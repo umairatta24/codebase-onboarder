@@ -34,6 +34,12 @@ def main():
         "url",
         help="The full GitHub repository URL (e.g. https://github.com/owner/repo)"
     )
+
+    parser.add_argument(
+        "--output",
+        help="Custom output path for the generated guide (e.g. ./docs/guide.md)",
+        default=None
+    )
     
     args = parser.parse_args()
     
@@ -48,8 +54,8 @@ def main():
     guide = generate_onboarding_guide(repo_data)
     
     # Step 4: Save the guide to a markdown file
-    filename = save_guide(guide, repo)
-    
+    filename = save_guide(guide, repo, output_path=args.output)
+
     print(f"\nDone! Open {filename} to read your onboarding guide.")
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 load_dotenv()
 
@@ -45,6 +46,56 @@ def get_readme(owner, repo):
         return base64.b64decode(data["content"]).decode("utf-8", errors="ignore")
     return "No README found."
 
+def prioritize_files(files):
+    """Score and rank files by how useful they are for understanding a codebase."""
+
+    # High value — these files tell you the most about a project
+    high_priority = [
+        "main.py", "app.py", "index.py", "server.py", "cli.py",
+        "main.js", "index.js", "app.js", "server.js",
+        "main.ts", "index.ts", "app.ts",
+        "main.go", "main.rs", "main.java",
+        "setup.py", "pyproject.toml", "package.json", "pom.xml",
+        "Makefile", "Dockerfile"
+    ]
+
+    # Low value — these rarely explain what a project does
+    low_priority_extensions = (
+        ".gitignore", ".travis.yml", ".eslintrc", ".prettierrc",
+        ".editorconfig", ".babelrc", ".lock", ".txt",
+        ".rst", ".cfg", ".ini", ".toml", ".md"
+    )
+
+    low_priority_names = (
+        "LICENSE", "MANIFEST.in", "HISTORY", "CHANGELOG",
+        "CONTRIBUTING", "AUTHORS", "NOTICE", "README"
+    )
+
+    def score(item):
+        name = item["name"]
+        # Skip binary and media files entirely
+        if name.endswith((".png", ".jpg", ".gif", ".svg", ".ico", ".pdf")):
+            return -1
+        # High priority files get top score
+        if name in high_priority:
+            return 2
+        # Low priority files get bottom score
+        if name.endswith(low_priority_extensions) or name.startswith("."):
+            return 0
+        if any(name.upper().startswith(n) for n in low_priority_names):
+            return 0
+        # Everything else (actual source files) gets middle score
+        return 1
+
+    # Sort by score descending, filter out anything with score -1
+    ranked = sorted(
+        [f for f in files if score(f) >= 0],
+        key=score,
+        reverse=True
+    )
+
+    return ranked
+
 def collect_repo_data(owner, repo):
     """Collect all the information we need from the repo."""
     print(f"Fetching repo info for {owner}/{repo}...")
@@ -67,14 +118,10 @@ def collect_repo_data(owner, repo):
     # Read up to 5 source files so we don't send too much to Claude
     source_files = {}
     count = 0
-    for item in files:
-        if count >= 5:
-            break
+    eligible_files = prioritize_files(files)[:5]
+
+    for item in tqdm(eligible_files, desc="Reading source files", unit="file"):
         name = item["name"]
-        # Skip files that aren't useful to read
-        if name.endswith((".md", ".lock", ".png", ".jpg", ".gif", ".svg")):
-            continue
-        print(f"Reading file: {name}")
         content = get_file_content(owner, repo, name)
         if content:
             source_files[name] = content
