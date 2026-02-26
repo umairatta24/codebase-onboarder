@@ -1,8 +1,8 @@
 # codebase-onboarder
 
-Getting dropped into an unfamiliar codebase is one of the most time-consuming parts of engineering. Reading through files, piecing together what does what, figuring out how to even run the thing — it can take hours.
+Getting dropped into an unfamiliar codebase is one of the most time-consuming parts of software development. Reading through files, piecing together what does what, figuring out how to even run the thing - it can take hours.
 
-This tool does it in seconds.
+This tool does it in seconds and seamlessly.
 
 Point it at any public GitHub repository and it generates a structured onboarding guide: what the project does, how the code is organized, how to get it running, and what to watch out for. Powered by the Claude API.
 
@@ -15,9 +15,9 @@ That's it. A markdown file gets saved to your current directory.
 
 ## Example
 ```bash
-$ python3 main.py https://github.com/kennethreitz/records
+$ python3 main.py https://github.com/umairatta24/codebase-onboarder
 
-Generating onboarding guide for: kennethreitz/records
+Generating onboarding guide for: umairatta24/codebase-onboarder
 
 Fetching repo info...
 Fetching README...
@@ -27,7 +27,7 @@ Sending to Claude...
 Onboarding guide saved to: records-onboarding.md
 ```
 
-The output covers what the project does, the tech stack, key files, setup instructions, core concepts, and common gotchas — written in plain English.
+The output covers what the project does, the tech stack, key files, setup instructions, core concepts, and common gotchas - written in plain language.
 
 ## Setup
 
@@ -60,7 +60,7 @@ python3 main.py https://github.com/owner/repo
 2. Feeds that context into a structured prompt and sends it to Claude
 3. Writes the response to a markdown file
 
-Source files are capped at 5 (300 lines each) to keep API usage minimal — a full run costs fractions of a cent.
+Source files are capped at 5 (300 lines each) to keep API usage minimal - a full run costs fractions of a cent.
 
 ## Project structure
 ```
@@ -69,10 +69,3 @@ github_client.py   # GitHub API calls and data collection
 ai_client.py       # Claude API integration and prompt construction
 file_writer.py     # Markdown file output
 ```
-
-## Possible extensions
-
-- Recursive file scanning for deeply nested projects
-- Support for private repos via fine-grained tokens
-- HTML or PDF export
-- Web interface
